@@ -11,6 +11,8 @@
 #include "hal_uart_emul.h"
 #include "hw_config.h"
 #include "interrupt.h"
+#include "LowPower.h"
+#include "rtc.h"
 #include "spi_com.h"
 #include "stm32_eeprom.h"
 #include "timer.h"

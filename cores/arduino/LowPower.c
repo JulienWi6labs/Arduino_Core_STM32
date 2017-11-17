@@ -46,6 +46,7 @@
 
 void LowPower_stop(){
 
+  HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
 
 }
 
