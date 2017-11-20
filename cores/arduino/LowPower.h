@@ -54,6 +54,8 @@
 /* Exported functions ------------------------------------------------------- */
 
 void LowPower_stop();
+void LowPower_shutdown();
+void LowPower_all_gpio_analog();
 
 #ifdef __cplusplus
  }
