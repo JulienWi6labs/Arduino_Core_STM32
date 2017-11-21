@@ -46,7 +46,10 @@
 
 void LowPower_stop(){
 
+  // Enter Stop mode
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+  // Exit Stop mode reset clocks
   SystemClock_Config();
 }
 

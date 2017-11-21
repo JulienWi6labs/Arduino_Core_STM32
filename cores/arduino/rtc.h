@@ -42,7 +42,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_def.h"
 
-#ifdef HAL_RTC_MODULE_ENABLED
+#ifndef HAL_RTC_MODULE_ENABLED
+#warning To use RTC lib, HAL_RTC_MODULE_ENABLED must be enabled in variants/BOARD_NAME/stm32xxxx_hal_conf.h
+#else
 
 #ifdef __cplusplus
  extern "C" {
