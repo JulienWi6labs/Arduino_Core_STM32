@@ -45,9 +45,16 @@
 #endif
 
 void LowPower_stop(){
+  /* Enable Power Clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  
+  /* Ensure that MSI is wake-up system clock */ 
+  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_MSI);
+
 
   // Enter Stop mode
-  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+//  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+  HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
 
   // Exit Stop mode reset clocks
   SystemClock_Config();
@@ -68,22 +75,31 @@ void LowPower_all_gpio_analog(){
   __GPIOB_CLK_ENABLE();
   __GPIOC_CLK_ENABLE();
   __GPIOD_CLK_ENABLE();
+  __GPIOE_CLK_ENABLE();
+  __GPIOF_CLK_ENABLE();
+  __GPIOG_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
 
   GPIO_InitStructure.Pin = GPIO_PIN_All;
-  GPIO_InitStructure.Speed = GPIO_SPEED_LOW;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStructure.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
   HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
   HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
   HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStructure);
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStructure);
   HAL_GPIO_Init(GPIOH, &GPIO_InitStructure);
 
   __GPIOA_CLK_DISABLE();
   __GPIOB_CLK_DISABLE();
   __GPIOC_CLK_DISABLE();
   __GPIOD_CLK_DISABLE();
+  __GPIOE_CLK_DISABLE();
+  __GPIOF_CLK_DISABLE();
+  __GPIOG_CLK_DISABLE();
   __GPIOH_CLK_DISABLE();
 
 }
