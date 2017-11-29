@@ -180,12 +180,41 @@ WEAK void SystemClock_Config(void)
 
 #else
 
+#if 0
+
+
+#define GPIO_TEST_CLK_ENABLE() __GPIOA_CLK_ENABLE()
+#define GPIO_TEST_PORT GPIOA
+#define GPIO_TEST_PIN  GPIO_PIN_5
+
+void init_gpio_test() {
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    GPIO_TEST_CLK_ENABLE();
+
+    GPIO_InitStructure.Mode =  GPIO_MODE_OUTPUT_PP;
+    //  GPIO_InitStructure.Mode =  GPIO_MODE_INPUT;
+    GPIO_InitStructure.Pull  = GPIO_NOPULL;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+
+    GPIO_InitStructure.Pin = GPIO_TEST_PIN;
+    HAL_GPIO_Init(GPIO_TEST_PORT , &GPIO_InitStructure );
+
+    HAL_GPIO_WritePin(GPIO_TEST_PORT, GPIO_TEST_PIN, GPIO_PIN_RESET);  
+}
+// HAL_GPIO_WritePin(GPIO_TEST_PORT, GPIO_TEST_PIN, GPIO_PIN_SET);
+// HAL_GPIO_WritePin(GPIO_TEST_PORT, GPIO_TEST_PIN, GPIO_PIN_RESET);
+// if (HAL_GPIO_ReadPin(GPIO_TEST_PORT, GPIO_TEST_PIN) == GPIO_PIN_SET)
+
+
 void SystemClock_Config(void)
 {
  
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
  
+ init_gpio_test();
+HAL_GPIO_WritePin(GPIO_TEST_PORT, GPIO_TEST_PIN, GPIO_PIN_RESET);
     /**Initializes the CPU, AHB and APB busses clocks 
     */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
@@ -201,6 +230,7 @@ void SystemClock_Config(void)
   {
     while(1); 
   }
+ HAL_GPIO_WritePin(GPIO_TEST_PORT, GPIO_TEST_PIN, GPIO_PIN_SET);
  
     /**Initializes the CPU, AHB and APB busses clocks 
     */
@@ -234,6 +264,69 @@ void SystemClock_Config(void)
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
+
+#else
+
+void SystemClock_Config(void)
+{
+ 
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+ 
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = 16;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+   while(1); 
+  }
+ 
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+ 
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+   while(1); 
+  }
+ 
+//  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+//  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_HSI;
+//  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+//  {
+//   while(1); 
+//  }
+ 
+    /**Configure the main internal regulator output voltage 
+    */
+  if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
+  {
+    while(1); 
+  }
+ 
+    /**Configure the Systick interrupt time 
+    */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+ 
+    /**Configure the Systick 
+    */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+ 
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+
+#endif
 #endif
 
 #ifdef __cplusplus
