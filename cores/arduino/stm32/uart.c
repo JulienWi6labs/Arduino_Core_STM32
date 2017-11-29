@@ -89,6 +89,7 @@ static serial_t *tx_callback_obj[UART_NUM];
   * @retval None
   */
 
+
 UART_HandleTypeDef * JSN_test_huart_handle;
 
 
@@ -295,6 +296,7 @@ void uart_init(serial_t *obj)
   huart->Init.Mode         = UART_MODE_TX_RX;
   huart->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
   huart->Init.OverSampling = UART_OVERSAMPLING_16;
+  huart->AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   // huart->Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 
 //  if(HAL_UART_Init(huart) != HAL_OK) {
@@ -325,6 +327,7 @@ HAL_UART_Init(huart);
 
      JSN_test_huart_handle = huart;
   }
+
 }
 
 /**
@@ -509,12 +512,13 @@ uint8_t serial_tx_active(serial_t *obj)
   */
 int uart_getc(serial_t *obj, unsigned char* c)
 {
+
   if(obj == NULL) {
     return -1;
   }
 
   if (serial_rx_active(obj)) {
-      return -1; // transaction ongoing
+    return -1; // transaction ongoing
   }
 
   *c = (unsigned char)(obj->recv);
@@ -534,6 +538,7 @@ int uart_getc(serial_t *obj, unsigned char* c)
  */
 void uart_attach_rx_callback(serial_t *obj, void (*callback)(serial_t*))
 {
+
   if(obj == NULL) {
     return;
   }
@@ -686,6 +691,14 @@ void USART2_IRQHandler(void)
 {
   HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
   HAL_UART_IRQHandler(uart_handlers[1]);
+}
+
+void HAL_UARTEx_WakeupCallback(UART_HandleTypeDef *huart)
+{
+  uint8_t index = uart_index(huart); 
+  serial_t *obj = rx_callback_obj[index];
+
+  HAL_UART_Receive_IT(huart,  &(obj->recv), 1);
 }
 
 /**

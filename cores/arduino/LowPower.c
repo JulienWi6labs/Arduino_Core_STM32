@@ -48,26 +48,27 @@ extern UART_HandleTypeDef * JSN_test_huart_handle;
 
 
 void LowPower_stop(){
+
   /* Enable Power Clock */
   __HAL_RCC_PWR_CLK_ENABLE();
-  
+
   /* Ensure that HSI is wake-up system clock */ 
-  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
+  //__HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
 
 
 
   HAL_UARTEx_EnableStopMode(JSN_test_huart_handle);
   // Enter Stop mode
-//  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+  //  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
   HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
-//  HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
+  //  HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
 
   // Exit Stop mode reset clocks
   SystemClock_Config();
   
   HAL_UARTEx_DisableStopMode(JSN_test_huart_handle);
-  
-  }
+
+}
 
 void LowPower_shutdown(){
 
