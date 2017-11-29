@@ -53,7 +53,7 @@ void LowPower_stop(){
   __HAL_RCC_PWR_CLK_ENABLE();
 
   /* Ensure that HSI is wake-up system clock */ 
-  //__HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
+  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
 
 
 
