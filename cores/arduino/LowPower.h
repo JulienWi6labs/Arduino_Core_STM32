@@ -53,7 +53,9 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+void LowPower_init();
 void LowPower_stop();
+void LowPower_standby();
 void LowPower_shutdown();
 void LowPower_all_gpio_analog();
 

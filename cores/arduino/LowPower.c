@@ -44,6 +44,25 @@
  extern "C" {
 #endif
 
+void LowPower_init(){
+  /* Enable Power Clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  /* Check if the system was resumed from StandBy mode */
+  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB) != RESET)
+  { 
+    /* Clear Standby flag */
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB); 
+  }
+
+  /* Check and Clear the Wakeup flag */
+  if (__HAL_PWR_GET_FLAG(PWR_FLAG_WUF2) != RESET)
+  {
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WUF2);
+  }
+
+}
+
 void LowPower_stop(){
   /* Enable Power Clock */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -58,6 +77,20 @@ void LowPower_stop(){
 
   // Exit Stop mode reset clocks
   SystemClock_Config();
+}
+
+void LowPower_standby(){
+  /* Enable Power Clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  /* Enable wakeup pin WKUP2 */
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);
+
+  HAL_PWR_EnterSTANDBYMode();
+
+  // Exit Stop mode reset clocks
+  SystemClock_Config();
+
 }
 
 void LowPower_shutdown(){
