@@ -45,28 +45,58 @@
 #endif
 
 extern UART_HandleTypeDef * JSN_test_huart_handle;
+extern I2C_HandleTypeDef * JSN_I2C_handler;
 
+uint8_t buf[16];
 
 void LowPower_stop(){
+  __HAL_RCC_I2C1_CLK_SLEEP_ENABLE();
+
+  HAL_I2C_DisableListen_IT(JSN_I2C_handler);
+
+  HAL_StatusTypeDef err = HAL_I2CEx_EnableWakeUp(JSN_I2C_handler);
+
+  if (err ) {
+
+    printf("ERR : %d\n", err);   
+    while(1){
+      asm(""); 
+    }
+  }
+
+  err =  HAL_I2C_EnableListen_IT( JSN_I2C_handler);
+
+  if (err ) {
+
+    printf("ERR 2 : %d\n", err);   
+    while(1){
+      asm(""); 
+    }
+  }
+
+  printf("CR1 %08x\n", I2C1->CR1);   
+  printf("CR2 %08x\n", I2C1->CR2);   
+  //HAL_I2C_Slave_Receive_IT(JSN_I2C_handler, buf , 16);
+
+  /* Ensure that HSI is wake-up system clock */ 
+  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
+  //  HAL_UARTEx_EnableStopMode(JSN_test_huart_handle);
+  // Enter Stop mode
 
   /* Enable Power Clock */
   __HAL_RCC_PWR_CLK_ENABLE();
 
-  /* Ensure that HSI is wake-up system clock */ 
-  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
 
-
-
-  HAL_UARTEx_EnableStopMode(JSN_test_huart_handle);
-  // Enter Stop mode
-  //  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+  //    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
   HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
   //  HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
 
   // Exit Stop mode reset clocks
   SystemClock_Config();
-  
-  HAL_UARTEx_DisableStopMode(JSN_test_huart_handle);
+
+  HAL_I2CEx_DisableWakeUp(JSN_I2C_handler);
+
+  //  HAL_UARTEx_DisableStopMode(JSN_test_huart_handle);
 
 }
 

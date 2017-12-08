@@ -140,6 +140,9 @@ void i2c_init(i2c_t *obj)
   i2c_custom_init(obj, I2C_100KHz, I2C_ADDRESSINGMODE_7BIT, 0x33, 1);
 }
 
+
+I2C_HandleTypeDef * JSN_I2C_handler;
+
 /**
   * @brief  Initialize and setup GPIO and I2C peripheral
   * @param  obj : pointer to i2c_t structure
@@ -279,8 +282,30 @@ void i2c_custom_init(i2c_t *obj, i2c_timing_e timing, uint32_t addressingMode, u
   HAL_NVIC_EnableIRQ(obj->irqER);
 #endif // !defined(STM32F0xx) && !defined(STM32L0xx)
 
+  // JSN dirty patch
+  {
+  /* Enable the Analog I2C Filter */
+  HAL_I2CEx_ConfigAnalogFilter(handle,I2C_ANALOGFILTER_DISABLE);
+
+    RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+    RCC_PeriphCLKInitStruct.I2c3ClockSelection = RCC_I2C1CLKSOURCE_HSI;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+
+  /*##-5- Configure the NVIC for I2C ########################################*/   
+  /* NVIC for I2Cx */
+  HAL_NVIC_SetPriority(I2C1_ER_IRQn, 0, 1);
+  HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
+  HAL_NVIC_SetPriority(I2C1_EV_IRQn, 0, 2);
+  HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+  
+    JSN_I2C_handler = handle;
+  
+  }
+
   // Init the I2C
   HAL_I2C_Init(handle);
+  printf("I2C init %08x\n", JSN_I2C_handler->Instance);   
 
   obj->isMaster = master;
 }
@@ -337,6 +362,9 @@ void i2c_setTiming(i2c_t *obj, uint32_t frequency)
 */
   HAL_I2C_Init(&(obj->handle));
   __HAL_I2C_ENABLE(&(obj->handle));
+
+
+  printf("I2C timings\n");   
 }
 
 /**
