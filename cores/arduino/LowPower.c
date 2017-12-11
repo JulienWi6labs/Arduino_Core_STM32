@@ -55,6 +55,19 @@ void LowPower_init(){
     __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB); 
   }
 
+
+//  HAL_PWR_EnableBkUpAccess();
+  
+  /* Check if the system was resumed from shutdown mode,
+     resort to RTC back-up register RTC_BKP31R to verify 
+     whether or not shutdown entry flag was set by software
+     before entering shutdown mode.  */
+//  if (READ_REG(RTC->BKP31R) == 1)
+//  {
+//     WRITE_REG( RTC->BKP31R, 0x0 );  /* reset back-up register */
+//  }
+
+
   /* Check and Clear the Wakeup flag */
   if (__HAL_PWR_GET_FLAG(PWR_FLAG_WUF2) != RESET)
   {
@@ -94,6 +107,22 @@ void LowPower_standby(){
 }
 
 void LowPower_shutdown(){
+  /* Enable Power Clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  /* Disable all used wakeup sources: WKUP pin */
+//  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
+
+  /* Clear wake up Flag */
+//  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WUF2);
+
+  /* Enable wakeup pin WKUP2 */
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);
+
+  /* Set RTC back-up register RTC_BKP31R to indicate
+     later on that system has entered shutdown mode  */
+//  WRITE_REG( RTC->BKP31R, 0x1 );
+  /* Enter shutdown mode */
 
   HAL_PWREx_EnterSHUTDOWNMode();
 
