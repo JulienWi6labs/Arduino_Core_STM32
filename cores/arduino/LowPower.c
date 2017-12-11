@@ -88,6 +88,19 @@ void LowPower_init(){
 
 }
 
+void LowPower_sleep(){
+  /*Suspend Tick increment to prevent wakeup by Systick interrupt. 
+    Otherwise the Systick interrupt will wake up the device within 1ms (HAL time base)*/
+  HAL_SuspendTick();
+
+  /* Enter Sleep Mode , wake up is done once User push-button is pressed */
+  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
+  /* Resume Tick interrupt if disabled prior to SLEEP mode entry */
+  HAL_ResumeTick();
+
+}
+
 void LowPower_stop(){
   /* Enable Power Clock */
   __HAL_RCC_PWR_CLK_ENABLE();
