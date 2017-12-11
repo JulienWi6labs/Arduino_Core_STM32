@@ -45,14 +45,13 @@
 #endif
 
 /* Private define ------------------------------------------------------------*/
-/* subsecond number of bits (RTC_ALARMSUBSECONDMASK_SS14_10)*/
-#define N_PREDIV_S                 10
-
+/* RTC prediv are set to the default values to match with the LSE clock source.
+  If the clock source is modified, those prescalers must be changed */
 /* Synchonuous prediv  */
-#define PREDIV_S                  ((1<<N_PREDIV_S)-1)
+#define PREDIV_S                  0x00FF
 
 /* Asynchonuous prediv   */
-#define PREDIV_A                  (1<<(15-N_PREDIV_S))-1
+#define PREDIV_A                  0x7F
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -60,23 +59,51 @@ static RTC_HandleTypeDef RtcHandle = {0};
 static void (*RTC_CB)(void) = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
-static void RTC_clockInit(void);
-
 /* Exported functions --------------------------------------------------------*/
-static void RTC_clockInit(void)
+
+/**
+  * @brief RTC MSP Initialization
+  *        This function configures the hardware resources used. By default the
+  *        LSE clock is used as RTC clock source.
+  * @param hrtc: RTC handle pointer
+  * @note  Care must be taken when HAL_RCCEx_PeriphCLKConfig() is used to select
+  *        the RTC clock source; in this case the Backup domain will be reset in
+  *        order to modify the RTC Clock source, as consequence RTC registers (including
+  *        the backup registers) and RCC_CSR register are set to their reset values.
+  * @retval None
+  */
+void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
 {
+  UNUSED(hrtc);
+  RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
+
+#ifdef __HAL_RCC_LSEDRIVE_CONFIG
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+#endif
+
+  RCC_OscInitStruct.OscillatorType =  RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+    while(1){
+          
+    }
+  }
+
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  if(HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+    while(1){
+          
+    }
+  }
 
   __HAL_RCC_RTC_ENABLE();
 }
 
 void RTC_init(hourFormat_t format)
 {
-  RTC_clockInit();
-
   RtcHandle.Instance = RTC;
 
   RtcHandle.Init.AsynchPrediv = PREDIV_A; /* RTC_ASYNCH_PREDIV; */
