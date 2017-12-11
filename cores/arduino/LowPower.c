@@ -45,6 +45,18 @@
 #endif
 
 void LowPower_init(){
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+  RTC_HandleTypeDef rtc_handle;
+
+  // Disable RTC in case it was activated in another sketch
+  __HAL_RCC_RTC_ENABLE();
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+  rtc_handle.Instance = RTC; 
+  HAL_RTC_DeInit(&rtc_handle);
+  __HAL_RCC_RTC_DISABLE();  
+
   /* Enable Power Clock */
   __HAL_RCC_PWR_CLK_ENABLE();
 
