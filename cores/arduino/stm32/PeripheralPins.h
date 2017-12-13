@@ -71,5 +71,7 @@ extern const PinMap PinMap_Ethernet[];
 //*** QUADSPI ***
 extern const PinMap PinMap_QUADSPI[];
 
+//*** WKUP ***
+extern const PinMap PinMap_WKUP[];
 #endif
 

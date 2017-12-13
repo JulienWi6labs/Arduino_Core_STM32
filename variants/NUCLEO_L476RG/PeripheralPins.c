@@ -283,3 +283,14 @@ const PinMap PinMap_CAN_TD[] = {
     {PB_9,   CAN1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_CAN1)},
     {NC,    NP,    0}
 };
+
+//*** WAKE UP ***
+
+const PinMap PinMap_WKUP[] = {
+    {PA_0,  NP,  1},  //WKUP1
+    {PC_13, NP,  2},  //WKUP2
+//  {PE_6,  NP,  3},  //WKUP3 - Not connected
+    {PA_2,  NP,  4},  //WKUP4
+    {PC_5,  NP,  5},  //WKUP5
+    {NC,    NP,  0}
+};

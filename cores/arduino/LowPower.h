@@ -54,6 +54,7 @@
 /* Exported functions ------------------------------------------------------- */
 
 void LowPower_init();
+void LowPower_EnableWakeUpPin(uint32_t pin, uint32_t mode);
 void LowPower_sleep();
 void LowPower_stop();
 void LowPower_standby();
