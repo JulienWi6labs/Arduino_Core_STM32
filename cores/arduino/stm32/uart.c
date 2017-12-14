@@ -88,7 +88,6 @@ static serial_t *tx_callback_obj[UART_NUM];
   * @param  obj : pointer to serial_t structure
   * @retval None
   */
-UART_HandleTypeDef * JSN_test_huart_handle;
 void uart_init(serial_t *obj)
 {
   if(obj == NULL) {
@@ -98,6 +97,7 @@ void uart_init(serial_t *obj)
   UART_HandleTypeDef *huart = &(obj->handle);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_TypeDef *port;
+#if 0
   // JSN Dirty PATCH
   {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -117,6 +117,7 @@ void uart_init(serial_t *obj)
     __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
   }
   // JSN Dirty PATCH
+#endif
 
   // Determine the UART to use (UART_1, UART_2, ...)
   USART_TypeDef *uart_tx = pinmap_peripheral(obj->pin_tx, PinMap_UART_TX);
@@ -298,6 +299,7 @@ void uart_init(serial_t *obj)
   if(HAL_UART_Init(huart) != HAL_OK) {
     return;
   }
+#if 0
   // JSN dirty patch to test UART Wake up
   {
     UART_WakeUpTypeDef WakeUpSelection; 
@@ -320,8 +322,9 @@ void uart_init(serial_t *obj)
     /* enable MCU wake-up by UART */
 //    HAL_UARTEx_EnableStopMode(huart);
 
-     JSN_test_huart_handle = huart;
   }
+#endif
+
 }
 
 /**
