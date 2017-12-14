@@ -123,6 +123,7 @@ WEAK void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStructHSI = {0};
 
   /* MSI is enabled after System reset, activate PLL with MSI as source */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
@@ -154,25 +155,18 @@ WEAK void SystemClock_Config(void)
     /* Initialization Error */
     while(1);
   }
-  // JSN Dirty PATCH
+
+  /*## Enable the HSI clock  #*/
+  RCC_OscInitStructHSI.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStructHSI.HSIState = RCC_HSI_ON;
+  RCC_OscInitStructHSI.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStructHSI.PLL.PLLState = RCC_PLL_NONE;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStructHSI)!= HAL_OK)
   {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-
-    /*##-1- Enable the HSI clock  #*/
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
-    {
-      /* Error */
-      while(1); 
-    }
-
-    /*##-2- Configure HSI as USART clock source #*/
-    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
+    /* Error */
+    while(1); 
   }
-  // JSN Dirty PATCH
+
 }
 
 #ifdef __cplusplus

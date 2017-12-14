@@ -37,7 +37,6 @@
   */
 
 #include "Arduino.h"
-#include "uart.h"
 #include "LowPower.h"
 
 #ifdef HAL_PWR_MODULE_ENABLED
@@ -191,44 +190,9 @@ void LowPower_EnableWakeUpUart(serial_t* serial, void (*FuncPtr)( void ) ) {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   UART_WakeUpTypeDef WakeUpSelection;
 
+  // Save Uart handler
   WakeUpUart = &(serial->handle);
 
-#if 1
-//printf("handler saved, UART2 %s\n", (WakeUpUart == USART2)?"OK":"KO" );   
-  /*##-1- Enable the HSI clock  : needed for wake up in stop mode #*/
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
-  {
-  /* Error */
-    while(1); 
-  }
-//printf("HSI Started\n");   
-
-  /*##-2- Configure HSI as USART clock source #*/
-//  if(serial->uart == USART1) {
-//    __HAL_RCC_USART1_CONFIG(RCC_USART1CLKSOURCE_HSI);
-//  }
-//  else if(serial->uart == USART2) {
-    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
-//  }
-//  else if(serial->uart == USART3) {
-//    __HAL_RCC_USART3_CONFIG(RCC_USART3CLKSOURCE_HSI);
-//  }
-#endif
-
-//printf("HSI conf\n");   
-// Reinit UART
-//uart_init(serial);
-  
-
-//  WakeUpUart = &(serial->handle);
-//printf("Sav handler\n");   
-//printf(" ");   
-
-#if 1
   /* make sure that no UART transfer is on-going */ 
   while(__HAL_UART_GET_FLAG(WakeUpUart, USART_ISR_BUSY) == SET);
   /* make sure that UART is ready to receive
@@ -240,11 +204,8 @@ void LowPower_EnableWakeUpUart(serial_t* serial, void (*FuncPtr)( void ) ) {
   WakeUpSelection.WakeUpEvent = UART_WAKEUP_ON_READDATA_NONEMPTY;
   HAL_UARTEx_StopModeWakeUpSourceConfig(WakeUpUart, WakeUpSelection);
 
-//printf("Select Wakeup event\n");   
   /* Enable the UART Wake UP from STOP1 mode Interrupt */
   __HAL_UART_ENABLE_IT(WakeUpUart, UART_IT_WUF);
-//printf("Enable IT\n");   
-#endif
 }
 
 #ifdef __cplusplus

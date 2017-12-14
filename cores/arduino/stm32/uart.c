@@ -97,31 +97,22 @@ void uart_init(serial_t *obj)
   UART_HandleTypeDef *huart = &(obj->handle);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_TypeDef *port;
-#if 0
-  // JSN Dirty PATCH
-  {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-
-    /*##-1- Enable the HSI clock  #*/
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
-    {
-      /* Error */
-      while(1); 
-    }
-
-    /*##-2- Configure HSI as USART clock source #*/
-    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
-  }
-  // JSN Dirty PATCH
-#endif
 
   // Determine the UART to use (UART_1, UART_2, ...)
   USART_TypeDef *uart_tx = pinmap_peripheral(obj->pin_tx, PinMap_UART_TX);
   USART_TypeDef *uart_rx = pinmap_peripheral(obj->pin_rx, PinMap_UART_RX);
+
+  // TODO add compile switch for L476
+  // Select HSI as source clock 
+  if(uart_tx == USART1) {
+    __HAL_RCC_USART1_CONFIG(RCC_USART1CLKSOURCE_HSI);
+  }
+  else if(uart_tx == USART2) {
+    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
+  }
+  else if(uart_tx == USART3) {
+    __HAL_RCC_USART3_CONFIG(RCC_USART3CLKSOURCE_HSI);
+  }
 
   //Pins Rx/Tx must not be NP
   if(uart_rx == NP || uart_tx == NP) {
@@ -299,32 +290,6 @@ void uart_init(serial_t *obj)
   if(HAL_UART_Init(huart) != HAL_OK) {
     return;
   }
-#if 0
-  // JSN dirty patch to test UART Wake up
-  {
-    UART_WakeUpTypeDef WakeUpSelection; 
-
-  /* make sure that no UART transfer is on-going */ 
-  while(__HAL_UART_GET_FLAG(huart, USART_ISR_BUSY) == SET);
-  /* make sure that UART is ready to receive
-   * (test carried out again later in HAL_UARTEx_StopModeWakeUpSourceConfig) */
-  while(__HAL_UART_GET_FLAG(huart, USART_ISR_REACK) == RESET);
-
-
-    /* set the wake-up event:
-     * specify wake-up on RXNE flag */
-    WakeUpSelection.WakeUpEvent = UART_WAKEUP_ON_READDATA_NONEMPTY;
-    HAL_UARTEx_StopModeWakeUpSourceConfig(huart, WakeUpSelection);
-
-    /* Enable the UART Wake UP from STOP1 mode Interrupt */
-    __HAL_UART_ENABLE_IT(huart, UART_IT_WUF);
-
-    /* enable MCU wake-up by UART */
-//    HAL_UARTEx_EnableStopMode(huart);
-
-  }
-#endif
-
 }
 
 /**
