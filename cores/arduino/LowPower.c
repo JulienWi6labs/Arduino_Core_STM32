@@ -46,6 +46,7 @@
 #endif
 
 static UART_HandleTypeDef* WakeUpUart = NULL;
+static void (*WakeUpUartCb)( void ) = NULL;
 
 void LowPower_init(){
   /* Enable Power Clock */
@@ -158,6 +159,9 @@ void LowPower_sleep(){
   /* Resume Tick interrupt if disabled prior to SLEEP mode entry */
   HAL_ResumeTick();
 
+  if (WakeUpUartCb != NULL) {
+    WakeUpUartCb();
+  }
 }
 
 void LowPower_stop(){
@@ -174,6 +178,10 @@ void LowPower_stop(){
 
   if (WakeUpUart != NULL) {
     HAL_UARTEx_DisableStopMode(WakeUpUart);
+
+    if (WakeUpUartCb != NULL) {
+      WakeUpUartCb();
+    }
   }
 }
 
@@ -192,6 +200,9 @@ void LowPower_EnableWakeUpUart(serial_t* serial, void (*FuncPtr)( void ) ) {
 
   // Save Uart handler
   WakeUpUart = &(serial->handle);
+
+  // Save callback
+  WakeUpUartCb = FuncPtr;
 
   /* make sure that no UART transfer is on-going */ 
   while(__HAL_UART_GET_FLAG(WakeUpUart, USART_ISR_BUSY) == SET);

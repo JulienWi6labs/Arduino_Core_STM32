@@ -102,18 +102,6 @@ void uart_init(serial_t *obj)
   USART_TypeDef *uart_tx = pinmap_peripheral(obj->pin_tx, PinMap_UART_TX);
   USART_TypeDef *uart_rx = pinmap_peripheral(obj->pin_rx, PinMap_UART_RX);
 
-#ifdef STM32L4xx
-  // Select HSI as source clock 
-  if(uart_tx == USART1) {
-    __HAL_RCC_USART1_CONFIG(RCC_USART1CLKSOURCE_HSI);
-  }
-  else if(uart_tx == USART2) {
-    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
-  }
-  else if(uart_tx == USART3) {
-    __HAL_RCC_USART3_CONFIG(RCC_USART3CLKSOURCE_HSI);
-  }
-#endif
 
   //Pins Rx/Tx must not be NP
   if(uart_rx == NP || uart_tx == NP) {
@@ -128,6 +116,19 @@ void uart_init(serial_t *obj)
     printf("ERROR: UART pins mismatch\n");
     return;
   }
+
+#ifdef STM32L4xx
+  // Select HSI as source clock 
+  if(obj->uart == USART1) {
+    __HAL_RCC_USART1_CONFIG(RCC_USART1CLKSOURCE_HSI);
+  }
+  else if(obj->uart == USART2) {
+    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
+  }
+  else if(obj->uart == USART3) {
+    __HAL_RCC_USART3_CONFIG(RCC_USART3CLKSOURCE_HSI);
+  }
+#endif
 
   // Enable USART clock
   if(obj->uart == USART1) {
