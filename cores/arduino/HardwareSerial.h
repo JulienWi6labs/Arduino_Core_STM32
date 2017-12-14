@@ -124,6 +124,8 @@ class HardwareSerial : public Stream
     void setRx(PinName _rx);
     void setTx(PinName _tx);
 
+    serial_t * getSerialPointer();
+
     // Interrupt handlers
     static void _rx_complete_irq(serial_t* obj);
     static int _tx_complete_irq(serial_t* obj);

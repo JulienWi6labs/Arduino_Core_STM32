@@ -88,6 +88,7 @@ static serial_t *tx_callback_obj[UART_NUM];
   * @param  obj : pointer to serial_t structure
   * @retval None
   */
+UART_HandleTypeDef * JSN_test_huart_handle;
 void uart_init(serial_t *obj)
 {
   if(obj == NULL) {
@@ -97,6 +98,25 @@ void uart_init(serial_t *obj)
   UART_HandleTypeDef *huart = &(obj->handle);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_TypeDef *port;
+  // JSN Dirty PATCH
+  {
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+
+    /*##-1- Enable the HSI clock  #*/
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
+    {
+      /* Error */
+      while(1); 
+    }
+
+    /*##-2- Configure HSI as USART clock source #*/
+    __HAL_RCC_USART2_CONFIG(RCC_USART2CLKSOURCE_HSI);
+  }
+  // JSN Dirty PATCH
 
   // Determine the UART to use (UART_1, UART_2, ...)
   USART_TypeDef *uart_tx = pinmap_peripheral(obj->pin_tx, PinMap_UART_TX);
@@ -272,10 +292,35 @@ void uart_init(serial_t *obj)
   huart->Init.Mode         = UART_MODE_TX_RX;
   huart->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
   huart->Init.OverSampling = UART_OVERSAMPLING_16;
+  huart->AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   // huart->Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 
   if(HAL_UART_Init(huart) != HAL_OK) {
     return;
+  }
+  // JSN dirty patch to test UART Wake up
+  {
+    UART_WakeUpTypeDef WakeUpSelection; 
+
+  /* make sure that no UART transfer is on-going */ 
+  while(__HAL_UART_GET_FLAG(huart, USART_ISR_BUSY) == SET);
+  /* make sure that UART is ready to receive
+   * (test carried out again later in HAL_UARTEx_StopModeWakeUpSourceConfig) */
+  while(__HAL_UART_GET_FLAG(huart, USART_ISR_REACK) == RESET);
+
+
+    /* set the wake-up event:
+     * specify wake-up on RXNE flag */
+    WakeUpSelection.WakeUpEvent = UART_WAKEUP_ON_READDATA_NONEMPTY;
+    HAL_UARTEx_StopModeWakeUpSourceConfig(huart, WakeUpSelection);
+
+    /* Enable the UART Wake UP from STOP1 mode Interrupt */
+    __HAL_UART_ENABLE_IT(huart, UART_IT_WUF);
+
+    /* enable MCU wake-up by UART */
+//    HAL_UARTEx_EnableStopMode(huart);
+
+     JSN_test_huart_handle = huart;
   }
 }
 
@@ -806,6 +851,19 @@ void UART10_IRQHandler(void)
   HAL_UART_IRQHandler(uart_handlers[9]);
 }
 #endif
+
+/**
+  * @brief  HAL UART Call Back
+  * @param  UART handler
+  * @retval None
+  */
+void HAL_UARTEx_WakeupCallback(UART_HandleTypeDef *huart)
+{
+  uint8_t index = uart_index(huart); 
+  serial_t *obj = rx_callback_obj[index];
+
+  HAL_UART_Receive_IT(huart,  &(obj->recv), 1);
+}
 
 #ifdef __cplusplus
 }

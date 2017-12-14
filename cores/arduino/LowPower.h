@@ -41,6 +41,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32_def.h"
+#include "uart.h"
 
 #ifdef HAL_PWR_MODULE_ENABLED
 
@@ -55,11 +56,11 @@
 
 void LowPower_init();
 void LowPower_EnableWakeUpPin(uint32_t pin, uint32_t mode);
+void LowPower_EnableWakeUpUart(serial_t* serial, void (*FuncPtr)( void ) );
 void LowPower_sleep();
 void LowPower_stop();
 void LowPower_standby();
 void LowPower_shutdown();
-void LowPower_all_gpio_analog();
 
 #ifdef __cplusplus
  }
