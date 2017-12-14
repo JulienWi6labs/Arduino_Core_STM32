@@ -102,7 +102,7 @@ void uart_init(serial_t *obj)
   USART_TypeDef *uart_tx = pinmap_peripheral(obj->pin_tx, PinMap_UART_TX);
   USART_TypeDef *uart_rx = pinmap_peripheral(obj->pin_rx, PinMap_UART_RX);
 
-  // TODO add compile switch for L476
+#ifdef STM32L4xx
   // Select HSI as source clock 
   if(uart_tx == USART1) {
     __HAL_RCC_USART1_CONFIG(RCC_USART1CLKSOURCE_HSI);
@@ -113,6 +113,7 @@ void uart_init(serial_t *obj)
   else if(uart_tx == USART3) {
     __HAL_RCC_USART3_CONFIG(RCC_USART3CLKSOURCE_HSI);
   }
+#endif
 
   //Pins Rx/Tx must not be NP
   if(uart_rx == NP || uart_tx == NP) {
